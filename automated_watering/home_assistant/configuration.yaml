@@ -1,0 +1,109 @@
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+rest_command:
+  init_sensors:
+    url: 'http://{ip:port}/init_sensors'
+    method: post
+    headers:
+      authorization: '{"Bearer": "{api_key}"}' 
+      accept: 'application/json; charset=UTF-8'
+      content_type: 'application/json; charset=utf-8'
+    content_type: 'application/x-www-form-urlencoded'
+
+  open_water_sensor_1:
+    url: 'http://{ip:port}/open_water'
+    method: post
+    payload: '{"sensor_id": "sensor_1"}'
+    headers:
+      authorization: '{"Bearer": "{api_key}"}' 
+      accept: 'application/json; charset=UTF-8'
+      content_type: 'application/json; charset=utf-8'
+    content_type: 'application/json'
+  open_water_sensor_2:
+    url: 'http://{ip:port}/open_water'
+    method: post
+    payload: '{"sensor_id": "sensor_2"}'
+    headers:
+      authorization: '{"Bearer": "{api_key}"}' 
+      accept: 'application/json; charset=UTF-8'
+      content_type: 'application/json; charset=utf-8'
+    content_type: 'application/json'
+
+  close_water_sensor_1:
+    url: 'http://{ip:port}/close_water'
+    method: post
+    payload: '{"sensor_id": "sensor_1"}'
+    headers:
+      authorization: '{"Bearer": "{api_key}"}' 
+      accept: 'application/json; charset=UTF-8'
+      content_type: 'application/json; charset=utf-8'
+    content_type: 'application/json'
+  close_water_sensor_2:
+    url: 'http://{ip:port}/close_water'
+    method: post
+    payload: '{"sensor_id": "sensor_2"}'
+    headers:
+      authorization: '{"Bearer": "{api_key}"}' 
+      accept: 'application/json; charset=UTF-8'
+      content_type: 'application/json; charset=utf-8'
+    content_type: 'application/json'
+
+mqtt:
+  sensor:
+    - name: "Reading Time"
+      state_topic: "raspberry/sensor_1"
+      value_template: "{{ value_json.time_of_reading }}"
+    - name: "Battery Level"
+      state_topic: "raspberry/sensor_1"
+      unit_of_measurement: "%"
+      value_template: "{{ value_json.battery_lever }}"
+    - name: "Light Intensity"
+      state_topic: "raspberry/sensor_1"
+      unit_of_measurement: "lx"
+      value_template: "{{ value_json.light_intensity }}"
+    - name: "Temperature"
+      state_topic: "raspberry/sensor_1"
+      unit_of_measurement: "°C"
+      value_template: "{{ value_json.temperature }}"
+    - name: "Soil Moisture"
+      state_topic: "raspberry/sensor_1"
+      unit_of_measurement: "%"
+      value_template: "{{ value_json.soil_moisture }}"
+    - name: "Soil Fertility"
+      state_topic: "raspberry/sensor_1"
+      unit_of_measurement: "µS/cm"
+      value_template: "{{ value_json.soil_fertility }}"
+
+    - name: "Reading Time"
+      state_topic: "raspberry/sensor_2"
+      value_template: "{{ value_json.time_of_reading }}"
+    - name: "Battery Level"
+      state_topic: "raspberry/sensor_2"
+      unit_of_measurement: "%"
+      value_template: "{{ value_json.battery_lever }}"
+    - name: "Light Intensity"
+      state_topic: "raspberry/sensor_2"
+      unit_of_measurement: "lx"
+      value_template: "{{ value_json.light_intensity }}"
+    - name: "Temperature"
+      state_topic: "raspberry/sensor_2"
+      unit_of_measurement: "°C"
+      value_template: "{{ value_json.temperature }}"
+    - name: "Soil Moisture"
+      state_topic: "raspberry/sensor_2"
+      unit_of_measurement: "%"
+      value_template: "{{ value_json.soil_moisture }}"
+    - name: "Soil Fertility"
+      state_topic: "raspberry/sensor_2"
+      unit_of_measurement: "µS/cm"
+      value_template: "{{ value_json.soil_fertility }}"
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
