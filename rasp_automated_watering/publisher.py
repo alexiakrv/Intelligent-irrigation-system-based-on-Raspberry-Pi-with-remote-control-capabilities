@@ -4,13 +4,13 @@ import time
 import atexit
 # import gpiozero
 
-from threading import Thread, Timer
+from threading import Timer
 from datetime import datetime
 
 from btlewrap.bluepy import BluepyBackend
 from miflora.miflora_poller import MiFloraPoller, MI_BATTERY, MI_CONDUCTIVITY, MI_LIGHT, MI_MOISTURE, MI_TEMPERATURE
 
-from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from flask import Flask, request, jsonify
 from flask_mqtt import Mqtt
@@ -44,7 +44,6 @@ app.config['MQTT_TLS_ENABLED'] = False  # If your server supports TLS, set it Tr
 mqtt_client = Mqtt(app)
 
 sensors_dict = {}
-threads = []
 
 connection_status = {
     0: "connection succeeded",
@@ -145,18 +144,13 @@ def schedule_sensor_monitoring():
 
     print("Scheduling jobs..")
 
-    for thread in threads:
-        thread.terminate()
-        thread.join()
-
     scheduler.remove_all_jobs()
 
     for sensor_name, sensor in sensors_dict.items():
         scheduler.add_job(read_sensor, 'interval', args=[sensor_name], minutes=sensor.measurement_interval)
 
-    thread = Thread(target=scheduler.start())
-    thread.start()
-    threads.append(thread)
+    if scheduler.state == 0:
+        scheduler.start()
     
 # Read data from specified sensor
 def read_sensor(sensor_name):
@@ -244,7 +238,7 @@ def close_water_pump(sensor_name, relay_pin):
 
 if __name__ == '__main__':
 
-    scheduler = BlockingScheduler()
+    scheduler = BackgroundScheduler()
     # GPIO.setmode(GPIO.BCM) 
 
     # atexit.register(lambda: GPIO.cleanup())
@@ -254,7 +248,6 @@ if __name__ == '__main__':
         with open(path, 'r') as file:
             data = json.load(file)
 
-        thread = Thread(target=initialize_sensors_and_motors, args=[data])
-        thread.start()
+        initialize_sensors_and_motors(data)
 
     app.run(host="0.0.0.0", port=5500, debug=True)

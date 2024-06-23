@@ -62,7 +62,10 @@ def init_sensors():
         print("Initializing sensors..")
         
         response = send_request("init_sensors", request_data)
-        return jsonify({"status": "success", "message": "Sensors initialized."}), 200
+        if response[1] == 200:
+            return jsonify({"status": "success", "message": "Sensors initialized."}), 200
+        else:
+            return jsonify({"status": "error", "message": "Failed to handle sensor initialization."}), 500
 
     except Exception as e:
        return jsonify({"status": "error", "message": "Failed to handle sensor initialization."}), 500
@@ -77,7 +80,10 @@ def open_water():
         print(f"Send request for {sensor_id} to open water")
 
         response = send_request("open_water", request_data)
-        return jsonify({"status": "success", "message": "open_water request handled."}), 200
+        if response[1] == 200:
+            return jsonify({"status": "success", "message": "open_water request handled."}), 200
+        else:
+            return jsonify({"status": "error", "message": "Failed to handle open_water request."}), 500
 
     except Exception as e:
        return jsonify({"status": "error", "message": "Failed to handle open_water request."}), 500
@@ -91,7 +97,10 @@ def close_water():
         print(f"Send request for {sensor_id} to close water")
 
         response = send_request("close_water", request_data)
-        return jsonify({"status": "success", "message": "close_water request handled."}), 200
+        if response[1] == 200:
+            return jsonify({"status": "success", "message": "close_water request handled."}), 200
+        else:
+            return jsonify({"status": "error", "message": "Failed to handle close_water request."}), 500
 
     except Exception as e:
        return jsonify({"status": "error", "message": "Failed to handle close_water request."}), 500
@@ -107,7 +116,7 @@ def send_request(request, data):
         response.raise_for_status()  # Raise an exception for HTTP errors
         
         print(response)  # Handle the response response.content
-        return response
+        return response, 200
 
     except requests.exceptions.ConnectionError as e:
 
