@@ -2,7 +2,6 @@ import os
 import json
 import time
 import atexit
-# import gpiozero
 
 from threading import Timer
 from datetime import datetime
@@ -15,7 +14,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, request, jsonify
 from flask_mqtt import Mqtt
 
-# import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 HOST= 
 CONFIG_PATH = path = os.path.dirname(os.path.abspath(__file__)) + "/sensors.config"
@@ -84,6 +83,7 @@ def authenticate_api_key(api_key):
 
 @app.before_request
 def before_request():
+
     api_key = request.headers.get("authorization")
     if not api_key or not authenticate_api_key(json.loads(api_key)):
         return jsonify({"status": "error", "message": "Unauthorized"}), 401
@@ -112,7 +112,7 @@ def initialize_sensors_and_motors(data):
 
     print("Sensors initialization started..")
 
-    # GPIO.cleanup()
+    GPIO.cleanup()
 
     for sensor_data in data:
         name = sensor_data['name']
@@ -125,8 +125,7 @@ def initialize_sensors_and_motors(data):
         poller = MiFloraPoller(mac_address, BluepyBackend)
         topic = "raspberry/" + name
 
-        # GPIO.setup(relay_pin, GPIO.OUT)
-        # GPIO.output(relay_pin, GPIO.HIGH)
+        GPIO.setup(relay_pin, GPIO.OUT)
         pin_status[relay_pin] = "OFF"
 
         sensor = SensorInfo(name, mac_address, measurement_interval, lower_limit, watering_interval, relay_pin, poller, topic)
@@ -208,7 +207,7 @@ def open_water_pump(sensor_name, relay_pin):
     print(f"Opening water for sensor {sensor_name} for {sensor_info.watering_interval} seconds...")
     
     if pin_status[relay_pin] == "OFF":
-        # GPIO.output(relay_pin, GPIO.LOW) # Relay turns ON
+        GPIO.output(relay_pin, GPIO.HIGH) # Relay turns ON
         pin_status[relay_pin] = "ON"
    
         t = Timer(sensor_info.watering_interval, close_water_pump, args=[sensor_name, relay_pin])
@@ -233,15 +232,15 @@ def close_water():
 def close_water_pump(sensor_name, relay_pin):
 
     print(f"Closing water for sensor {sensor_name}...")
-    # GPIO.output(relay_pin, GPIO.HIGH) # Relay turns OFF
+    GPIO.output(relay_pin, GPIO.LOW) # Relay turns OFF
     pin_status[relay_pin] = "OFF"
 
 if __name__ == '__main__':
 
     scheduler = BackgroundScheduler()
-    # GPIO.setmode(GPIO.BCM) 
+    GPIO.setmode(GPIO.BCM) 
 
-    # atexit.register(lambda: GPIO.cleanup())
+    atexit.register(lambda: GPIO.cleanup())
     atexit.register(lambda: scheduler.shutdown())
 
     if os.path.isfile(path):
